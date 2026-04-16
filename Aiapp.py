@@ -11,7 +11,10 @@ from reportlab.lib.styles import getSampleStyleSheet
 # 🔑 CONFIGURE GEMINI
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-model = genai.GenerativeModel("gemini-1.5-flash-001") # fast + free
+try:
+    model = genai.GenerativeModel("gemini-1.5-flash-001")
+except:
+    model = genai.GenerativeModel("gemini-pro")
 
 # ⚡ AI FUNCTION
 @st.cache_data(show_spinner=False)
