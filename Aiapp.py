@@ -1,13 +1,32 @@
 
-import os
+# final version - 07
+
 import streamlit as st
+import os
 from openai import OpenAI
 import matplotlib.pyplot as plt
 from reportlab.platypus import SimpleDocTemplate, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
 
-# 🔑 API KEY
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"),timeout=30)
+# 🔑 API KEY (from Streamlit secrets)
+client = OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    timeout=30
+)
+
+# ⚡ CACHE FUNCTION (fixes loading issue)
+@st.cache_data(show_spinner=False)
+def get_ai_response(prompt):
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4.1-mini",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        return f"⚠️ Error: {str(e)}"
+
+
 # 🌐 PAGE CONFIG
 st.set_page_config(page_title="AI Career Counselor Pro", page_icon="🧠", layout="centered")
 
@@ -33,9 +52,6 @@ h1, h2, h3 {
     height: 3em;
     font-size: 16px;
 }
-.stTextInput, .stTextArea, .stSelectbox {
-    border-radius: 10px;
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -44,7 +60,7 @@ st.title("🧠 AI Career Counselor Pro")
 st.caption("🚀 Discover. Analyze. Grow.")
 st.markdown("---")
 
-# 🧠 QUIZ SECTION
+# 🧠 QUIZ
 st.markdown("## 🧠 Personality Quiz")
 
 col1, col2 = st.columns(2)
@@ -66,7 +82,7 @@ st.markdown("---")
 st.markdown("## 💬 Tell us more about yourself")
 user_input = st.text_area("Write about your interests, goals, personality...")
 
-# 📊 SCORING FUNCTION
+# 📊 SCORING
 def calculate_scores(q1, q2, q3):
     scores = {"Tech": 0, "Creative": 0, "Business": 0}
 
@@ -93,76 +109,70 @@ def calculate_scores(q1, q2, q3):
 
     return scores
 
-# 🚀 ANALYZE BUTTON
+# 🚀 ANALYZE
 if st.button("🚀 Analyze My Career"):
 
-    scores = calculate_scores(q1, q2, q3)
+    if not user_input:
+        st.warning("Please write something about yourself")
+    else:
+        scores = calculate_scores(q1, q2, q3)
 
-    # 📊 GRAPH
-    st.markdown("## 📊 Your Strength Profile")
-    categories = list(scores.keys())
-    values = list(scores.values())
+        # GRAPH
+        st.markdown("## 📊 Your Strength Profile")
+        categories = list(scores.keys())
+        values = list(scores.values())
 
-    fig, ax = plt.subplots()
-    ax.bar(categories, values)
-    ax.set_ylabel("Score")
-    ax.set_title("Your Strength Analysis")
-    st.pyplot(fig)
+        fig, ax = plt.subplots()
+        ax.bar(categories, values)
+        ax.set_ylabel("Score")
+        ax.set_title("Your Strength Analysis")
+        st.pyplot(fig)
 
-    # 🤖 AI RECOMMENDATION
-    prompt = f"""
-    You are an expert career counselor.
+        # AI RESPONSE
+        prompt = f"""
+        You are an expert career counselor.
 
-    User scores:
-    {scores}
+        User scores:
+        {scores}
 
-    User description:
-    {user_input}
+        User description:
+        {user_input}
 
-    Give:
+        Give:
 
-    ### Top 3 Career Options (Detailed)
-    - Why suitable
-    - Skills required (with definitions)
-    - Where to learn
+        Top 3 Career Options (Detailed)
+        - Why suitable
+        - Skills required
+        - Where to learn
 
-    ### Additional Career Options (5)
-    (Short list)
+        Additional 5 career options
 
-    Also give roadmap and motivation.
-    """
+        Also give roadmap and motivation.
+        """
 
-    response = client.chat.completions.create(
-        model="gpt-4.1-mini",
-        messages=[{"role": "user", "content": prompt}]
-    )
+        result = get_ai_response(prompt)
 
-    result = response.choices[0].message.content
+        st.markdown("## 🎯 Career Recommendations")
+        st.markdown(result)
 
-    # 🎯 OUTPUT
-    st.markdown("## 🎯 We highly recommend you to consider these careers 👇")
-    st.markdown(result)
+        # PDF
+        def create_pdf(text):
+            doc = SimpleDocTemplate("career_report.pdf")
+            styles = getSampleStyleSheet()
+            story = [Paragraph(text, styles["Normal"])]
+            doc.build(story)
 
-    st.markdown("---")
+        create_pdf(result)
 
-    # 📥 PDF
-    def create_pdf(text):
-        doc = SimpleDocTemplate("career_report.pdf")
-        styles = getSampleStyleSheet()
-        story = [Paragraph(text, styles["Normal"])]
-        doc.build(story)
+        with open("career_report.pdf", "rb") as file:
+            st.download_button(
+                label="📥 Download Report",
+                data=file,
+                file_name="career_report.pdf",
+                mime="application/pdf"
+            )
 
-    create_pdf(result)
-
-    with open("career_report.pdf", "rb") as file:
-        st.download_button(
-            label="📥 Download Report",
-            data=file,
-            file_name="career_report.pdf",
-            mime="application/pdf"
-        )
-
-# 🌍 EXPLORE CAREERS
+# 🌍 EXPLORE
 st.markdown("---")
 st.markdown("## 🌍 Explore Career Paths")
 
@@ -172,45 +182,26 @@ category = st.selectbox(
 )
 
 if st.button("🔎 Show Careers"):
-
-    explore_prompt = f"""
-    List 20 careers in {category}.
-    Give 1-line description for each.
-    """
-
-    explore_response = client.chat.completions.create(
-        model="gpt-4.1-mini",
-        messages=[{"role": "user", "content": explore_prompt}]
-    )
-
-    careers_list = explore_response.choices[0].message.content
+    explore_prompt = f"List 20 careers in {category} with 1-line description"
+    careers_list = get_ai_response(explore_prompt)
 
     st.markdown("### 📌 Career Options")
     st.markdown(careers_list)
 
-# 🔍 CAREER EXPLAINER
+# 🔍 EXPLAIN
 st.markdown("---")
 st.markdown("## 🔍 Know Any Career")
 
 career_name = st.text_input("Enter a career name")
 
 if st.button("📖 Explain Career"):
-
     explain_prompt = f"""
-    Explain the career '{career_name}'.
-
-    Include:
+    Explain the career '{career_name}' with:
     - Definition
-    - Skills required (with definitions)
+    - Skills required
     - Where to learn
     """
-
-    explain_response = client.chat.completions.create(
-        model="gpt-4.1-mini",
-        messages=[{"role": "user", "content": explain_prompt}]
-    )
-
-    explanation = explain_response.choices[0].message.content
+    explanation = get_ai_response(explain_prompt)
 
     st.markdown("### 📘 Career Details")
     st.markdown(explanation)
