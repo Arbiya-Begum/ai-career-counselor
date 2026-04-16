@@ -19,7 +19,7 @@ except:
     model = genai.GenerativeModel("gemini-pro")
     
 
-result = response.text
+
 
 # ⚡ AI FUNCTION
 @st.cache_data(show_spinner=False)
