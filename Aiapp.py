@@ -17,7 +17,7 @@ try:
 
 except:
     model = genai.GenerativeModel("gemini-pro")
-    response = model.generate_content(prompt)
+    
 
 result = response.text
 
