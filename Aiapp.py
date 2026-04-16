@@ -13,8 +13,13 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 try:
     model = genai.GenerativeModel("gemini-1.5-flash-001")
+    response = model.generate_content(prompt)
+
 except:
     model = genai.GenerativeModel("gemini-pro")
+    response = model.generate_content(prompt)
+
+result = response.text
 
 # ⚡ AI FUNCTION
 @st.cache_data(show_spinner=False)
