@@ -1,31 +1,23 @@
-
-# final version - GEMINI 
+# final version - GEMINI (WORKING & UPDATED)
 
 import streamlit as st
 import os
-import google.generativeai as genai
+from google import genai
 import matplotlib.pyplot as plt
 from reportlab.platypus import SimpleDocTemplate, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
 
-# 🔑 CONFIGURE GEMINI
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-
-try:
-    model = genai.GenerativeModel("gemini-1.5-flash-001")
-    response = model.generate_content(prompt)
-
-except:
-    model = genai.GenerativeModel("gemini-pro")
-    
-
-
+# 🔑 GEMINI CLIENT (NEW API)
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 # ⚡ AI FUNCTION
 @st.cache_data(show_spinner=False)
 def get_ai_response(prompt):
     try:
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",   # ✅ latest working free model
+            contents=prompt
+        )
         return response.text
     except Exception as e:
         return f"⚠️ Error: {str(e)}"
@@ -88,6 +80,7 @@ if st.button("🚀 Analyze My Career"):
     else:
         scores = calculate_scores(q1, q2, q3)
 
+        # 📊 GRAPH
         fig, ax = plt.subplots()
         ax.bar(scores.keys(), scores.values())
         st.pyplot(fig)
@@ -107,7 +100,7 @@ if st.button("🚀 Analyze My Career"):
         st.markdown("## 🎯 Career Suggestions")
         st.markdown(result)
 
-        # PDF
+        # 📥 PDF
         def create_pdf(text):
             doc = SimpleDocTemplate("career_report.pdf")
             styles = getSampleStyleSheet()
@@ -128,15 +121,20 @@ category = st.selectbox(
 
 if st.button("🔎 Show Careers"):
     prompt = f"List 10 careers in {category} with short description"
-    st.markdown(get_ai_response(prompt))
+    result = get_ai_response(prompt)
+    st.markdown(result)
 
 # 🔍 EXPLAIN
 st.markdown("---")
 career_name = st.text_input("Enter career name")
 
 if st.button("📖 Explain Career"):
-    prompt = f"Explain {career_name} with skills and roadmap"
-    st.markdown(get_ai_response(prompt))
+    if not career_name:
+        st.warning("Please enter a career name")
+    else:
+        prompt = f"Explain {career_name} with skills and roadmap"
+        result = get_ai_response(prompt)
+        st.markdown(result)
 
 # FOOTER
 st.markdown("---")
