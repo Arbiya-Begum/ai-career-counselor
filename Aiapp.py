@@ -1,45 +1,32 @@
 
-# final version - 08 (low cost optimized + demo mode)
+# final version - GEMINI 
 
 import streamlit as st
 import os
-from openai import OpenAI
+import google.generativeai as genai
 import matplotlib.pyplot as plt
 from reportlab.platypus import SimpleDocTemplate, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
 
-# 🔑 API KEY
-client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY"),
-    timeout=30
-)
+# 🔑 CONFIGURE GEMINI
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-# 🎛️ DEMO MODE TOGGLE
-demo_mode = st.toggle("🧪 Demo Mode (No API usage)", value=False)
+model = genai.GenerativeModel("gemini-1.5-flash")  # fast + free
 
-# ⚡ OPTIMIZED AI FUNCTION (CHEAP + LIMITED TOKENS)
+# ⚡ AI FUNCTION
 @st.cache_data(show_spinner=False)
 def get_ai_response(prompt):
-    if demo_mode:
-        return "🧪 Demo Mode Active — AI response disabled to save cost."
-
     try:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",   # 💸 cheap model
-            max_tokens=300,        # 💸 limit cost
-            messages=[{"role": "user", "content": prompt}]
-        )
-        return response.choices[0].message.content
+        response = model.generate_content(prompt)
+        return response.text
     except Exception as e:
         return f"⚠️ Error: {str(e)}"
 
-
-# 🌐 PAGE CONFIG
+# 🌐 PAGE
 st.set_page_config(page_title="AI Career Counselor Pro", page_icon="🧠")
 
-# 🎨 UI
 st.title("🧠 AI Career Counselor Pro")
-st.caption("🚀 Discover. Analyze. Grow.")
+st.caption("🚀 100% Free AI Powered App")
 st.markdown("---")
 
 # 🧠 QUIZ
@@ -93,12 +80,10 @@ if st.button("🚀 Analyze My Career"):
     else:
         scores = calculate_scores(q1, q2, q3)
 
-        # GRAPH
         fig, ax = plt.subplots()
         ax.bar(scores.keys(), scores.values())
         st.pyplot(fig)
 
-        # 💸 OPTIMIZED PROMPT
         prompt = f"""
         Scores: {scores}
         User: {user_input}
@@ -106,7 +91,7 @@ if st.button("🚀 Analyze My Career"):
         Suggest:
         - 3 careers (short reason)
         - 5 more careers
-        - simple roadmap
+        - roadmap
         """
 
         result = get_ai_response(prompt)
@@ -142,9 +127,9 @@ st.markdown("---")
 career_name = st.text_input("Enter career name")
 
 if st.button("📖 Explain Career"):
-    prompt = f"Explain {career_name} briefly with skills and roadmap"
+    prompt = f"Explain {career_name} with skills and roadmap"
     st.markdown(get_ai_response(prompt))
 
 # FOOTER
 st.markdown("---")
-st.caption("🏆 AI Career Counselor Pro")
+st.caption("🏆 AI Career Counselor Pro (Free Version)")
