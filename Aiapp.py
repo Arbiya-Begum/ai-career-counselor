@@ -1,32 +1,15 @@
-# final version - GEMINI (WORKING & UPDATED)
+# final version - NO AI (Stable Hackathon Version)
 
 import streamlit as st
-import os
-from google import genai
 import matplotlib.pyplot as plt
 from reportlab.platypus import SimpleDocTemplate, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
-
-# 🔑 GEMINI CLIENT (NEW API)
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-
-# ⚡ AI FUNCTION
-@st.cache_data(show_spinner=False)
-def get_ai_response(prompt):
-    try:
-        response = client.models.generate_content(
-            model="gemini-2.0-flash",   # ✅ latest working free model
-            contents=prompt
-        )
-        return response.text
-    except Exception as e:
-        return f"⚠️ Error: {str(e)}"
 
 # 🌐 PAGE
 st.set_page_config(page_title="AI Career Counselor Pro", page_icon="🧠")
 
 st.title("🧠 AI Career Counselor Pro")
-st.caption("🚀 100% Free AI Powered App")
+st.caption("🚀 Smart Career Guidance (No API Mode)")
 st.markdown("---")
 
 # 🧠 QUIZ
@@ -72,6 +55,84 @@ def calculate_scores(q1, q2, q3):
 
     return scores
 
+# 🧠 CAREER LOGIC
+def get_career_recommendation(scores, user_input):
+    if scores["Tech"] >= scores["Creative"] and scores["Tech"] >= scores["Business"]:
+        return """
+## 💻 Top Careers
+- Data Scientist  
+- Software Developer  
+- AI Engineer  
+
+### 📌 Why?
+You are strong in logic and problem-solving.
+
+### 🛠 Skills Needed
+- Python → programming language  
+- Data Analysis → working with data  
+- Machine Learning → teaching machines  
+
+### 🚀 Roadmap
+1. Learn Python  
+2. Learn SQL  
+3. Build projects  
+4. Learn Machine Learning  
+
+### ⭐ More Options
+- Cybersecurity Analyst  
+- Cloud Engineer  
+"""
+
+    elif scores["Creative"] >= scores["Business"]:
+        return """
+## 🎨 Top Careers
+- UI/UX Designer  
+- Graphic Designer  
+- Animator  
+
+### 📌 Why?
+You are creative and design-focused.
+
+### 🛠 Skills Needed
+- Design Thinking  
+- Tools like Figma  
+- Creativity  
+
+### 🚀 Roadmap
+1. Learn design basics  
+2. Practice tools  
+3. Build portfolio  
+
+### ⭐ More Options
+- Video Editor  
+- Content Creator  
+"""
+
+    else:
+        return """
+## 📊 Top Careers
+- Business Analyst  
+- Marketing Manager  
+- Entrepreneur  
+
+### 📌 Why?
+You have leadership and communication skills.
+
+### 🛠 Skills Needed
+- Communication  
+- Strategy  
+- Management  
+
+### 🚀 Roadmap
+1. Learn business basics  
+2. Study case studies  
+3. Gain internships  
+
+### ⭐ More Options
+- HR Manager  
+- Sales Executive  
+"""
+
 # 🚀 ANALYZE
 if st.button("🚀 Analyze My Career"):
 
@@ -83,21 +144,11 @@ if st.button("🚀 Analyze My Career"):
         # 📊 GRAPH
         fig, ax = plt.subplots()
         ax.bar(scores.keys(), scores.values())
+        ax.set_title("Your Strength Analysis")
         st.pyplot(fig)
 
-        prompt = f"""
-        Scores: {scores}
-        User: {user_input}
+        result = get_career_recommendation(scores, user_input)
 
-        Suggest:
-        - 3 careers (short reason)
-        - 5 more careers
-        - roadmap
-        """
-
-        result = get_ai_response(prompt)
-
-        st.markdown("## 🎯 Career Suggestions")
         st.markdown(result)
 
         # 📥 PDF
@@ -120,22 +171,72 @@ category = st.selectbox(
 )
 
 if st.button("🔎 Show Careers"):
-    prompt = f"List 10 careers in {category} with short description"
-    result = get_ai_response(prompt)
-    st.markdown(result)
+    if category == "Technology":
+        st.markdown("""
+- Data Scientist  
+- Web Developer  
+- AI Engineer  
+- Cybersecurity Analyst  
+- Cloud Engineer  
+""")
+
+    elif category == "Creative":
+        st.markdown("""
+- Graphic Designer  
+- Animator  
+- UI/UX Designer  
+- Video Editor  
+- Content Creator  
+""")
+
+    elif category == "Business":
+        st.markdown("""
+- Business Analyst  
+- Marketing Manager  
+- Entrepreneur  
+- HR Manager  
+- Sales Executive  
+""")
+
+    elif category == "Science":
+        st.markdown("""
+- Research Scientist  
+- Lab Technician  
+- Physicist  
+- Chemist  
+""")
+
+    else:
+        st.markdown("""
+- Doctor  
+- Nurse  
+- Pharmacist  
+- Medical Lab Technician  
+""")
 
 # 🔍 EXPLAIN
 st.markdown("---")
 career_name = st.text_input("Enter career name")
 
 if st.button("📖 Explain Career"):
-    if not career_name:
-        st.warning("Please enter a career name")
+    if career_name.lower() == "data scientist":
+        st.markdown("""
+### 📘 Data Scientist
+Analyzes data to extract insights.
+
+### 🛠 Skills:
+- Python  
+- Statistics  
+- Machine Learning  
+
+### 🚀 Roadmap:
+1. Learn Python  
+2. Learn Data Analysis  
+3. Build projects  
+""")
     else:
-        prompt = f"Explain {career_name} with skills and roadmap"
-        result = get_ai_response(prompt)
-        st.markdown(result)
+        st.markdown("⚠️ Detailed info coming soon...")
 
 # FOOTER
 st.markdown("---")
-st.caption("🏆 AI Career Counselor Pro (Free Version)")
+st.caption("🏆 AI Career Counselor Pro (Hackathon Version - No API)")
