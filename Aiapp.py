@@ -6,10 +6,10 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
 
 # 🌐 PAGE
-st.set_page_config(page_title="AI Career Counselor Pro", page_icon="🧠")
+st.set_page_config(page_title="Career Counselor ", page_icon="🤓")
 
-st.title("🧠 AI Career Counselor Pro")
-st.caption("🚀 Smart Career Guidance (No API Mode)")
+st.title("🤓 Career Counselor ")
+st.caption("🚀 Smart Career Guidance ")
 st.markdown("---")
 
 # 🧠 QUIZ
@@ -239,4 +239,4 @@ Analyzes data to extract insights.
 
 # FOOTER
 st.markdown("---")
-st.caption("🏆 AI Career Counselor Pro (Hackathon Version - No API)")
+st.caption("🏆 Career Counselor (Hackathon Version )")
