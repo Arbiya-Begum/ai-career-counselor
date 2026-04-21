@@ -1,242 +1,186 @@
-# final version - NO AI (Stable Hackathon Version)
+ # AI Career Counselor Pro - ADVANCED (No API, Smart Logic)
 
 import streamlit as st
 import matplotlib.pyplot as plt
 from reportlab.platypus import SimpleDocTemplate, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
 
-# 🌐 PAGE
-st.set_page_config(page_title="Career Counselor ", page_icon="🤓")
+# 🌐 PAGE CONFIG
+st.set_page_config(page_title="AI Career Counselor Pro", page_icon="🧠", layout="centered")
 
-st.title("🤓 Career Counselor ")
-st.caption("🚀 Smart Career Guidance ")
+# 🎨 UI STYLE
+st.markdown("""
+<style>
+.stButton>button {
+    background: linear-gradient(90deg, #00c6ff, #0072ff);
+    color: white;
+    border-radius: 10px;
+    height: 3em;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# 🧠 TITLE
+st.title("🧠 AI Career Counselor Pro")
+st.caption("🚀 Smart Career Intelligence System")
 st.markdown("---")
 
-# 🧠 QUIZ
-col1, col2 = st.columns(2)
+# ================= QUIZ =================
+st.markdown("## 🧠 Personal Intelligence Quiz")
+
+col1, col2, col3 = st.columns(3)
 
 with col1:
-    q1 = st.radio("What do you enjoy most?", 
-                  ["Solving problems", "Creating designs", "Leading people"])
-    q2 = st.radio("Your strongest skill?", 
-                  ["Logic", "Creativity", "Communication"])
+    q1 = st.radio("What excites you?", ["Solving problems", "Designing", "Leading"])
+    q2 = st.radio("Pick a strength", ["Logic", "Creativity", "Communication"])
 
 with col2:
-    q3 = st.radio("Preferred work style?", 
-                  ["Independent", "Teamwork", "Leadership"])
+    q3 = st.radio("Work style?", ["Alone", "Team", "Leadership"])
+    q4 = st.radio("Favorite subject?", ["Math", "Arts", "Business"])
 
-# 💬 INPUT
-user_input = st.text_area("Tell us about yourself")
+with col3:
+    q5 = st.radio("Decision making?", ["Analytical", "Creative", "Strategic"])
+    q6 = st.radio("You prefer?", ["Coding", "Designing", "Managing"])
 
-# 📊 SCORING
-def calculate_scores(q1, q2, q3):
+# 🚀 ANALYZE BUTTON
+analyze_btn = st.button("🔘 Analyze My Intelligence")
+
+# ================= USER INPUT =================
+st.markdown("---")
+st.markdown("## 💬 Tell Us About Yourself")
+user_input = st.text_area("Your interests, goals, personality...")
+
+# ================= LOGIC =================
+def calculate_scores():
     scores = {"Tech": 0, "Creative": 0, "Business": 0}
 
-    if q1 == "Solving problems":
-        scores["Tech"] += 2
-    elif q1 == "Creating designs":
-        scores["Creative"] += 2
-    else:
-        scores["Business"] += 2
+    mapping = {
+        "Solving problems": "Tech",
+        "Designing": "Creative",
+        "Leading": "Business",
+        "Logic": "Tech",
+        "Creativity": "Creative",
+        "Communication": "Business",
+        "Alone": "Tech",
+        "Team": "Creative",
+        "Leadership": "Business",
+        "Math": "Tech",
+        "Arts": "Creative",
+        "Business": "Business",
+        "Analytical": "Tech",
+        "Creative": "Creative",
+        "Strategic": "Business",
+        "Coding": "Tech",
+        "Designing": "Creative",
+        "Managing": "Business"
+    }
 
-    if q2 == "Logic":
-        scores["Tech"] += 2
-    elif q2 == "Creativity":
-        scores["Creative"] += 2
-    else:
-        scores["Business"] += 2
+    answers = [q1, q2, q3, q4, q5, q6]
 
-    if q3 == "Independent":
-        scores["Tech"] += 1
-    elif q3 == "Teamwork":
-        scores["Creative"] += 1
-    else:
-        scores["Business"] += 1
+    for ans in answers:
+        scores[mapping[ans]] += 1
 
     return scores
 
-# 🧠 CAREER LOGIC
-def get_career_recommendation(scores, user_input):
-    if scores["Tech"] >= scores["Creative"] and scores["Tech"] >= scores["Business"]:
+# 🧠 SMART RECOMMENDATION
+def generate_result(scores, user_input):
+    dominant = max(scores, key=scores.get)
+
+    if dominant == "Tech":
         return """
-## 💻 Top Careers
+## 💻 Recommended Path: TECH INTELLIGENCE
+
+You show strong analytical thinking and problem-solving ability.
+
+### 🎯 Careers:
 - Data Scientist  
-- Software Developer  
+- Software Engineer  
 - AI Engineer  
 
-### 📌 Why?
-You are strong in logic and problem-solving.
+### 🚀 Strategy:
+Start with Python → Build Projects → Learn ML → Real-world practice
 
-### 🛠 Skills Needed
-- Python → programming language  
-- Data Analysis → working with data  
-- Machine Learning → teaching machines  
-
-### 🚀 Roadmap
-1. Learn Python  
-2. Learn SQL  
-3. Build projects  
-4. Learn Machine Learning  
-
-### ⭐ More Options
-- Cybersecurity Analyst  
-- Cloud Engineer  
 """
 
-    elif scores["Creative"] >= scores["Business"]:
+    elif dominant == "Creative":
         return """
-## 🎨 Top Careers
+## 🎨 Recommended Path: CREATIVE INTELLIGENCE
+
+You have strong imagination and design thinking.
+
+### 🎯 Careers:
 - UI/UX Designer  
-- Graphic Designer  
 - Animator  
+- Creative Director  
 
-### 📌 Why?
-You are creative and design-focused.
+### 🚀 Strategy:
+Learn design tools → Build portfolio → Freelance → Brand yourself
 
-### 🛠 Skills Needed
-- Design Thinking  
-- Tools like Figma  
-- Creativity  
-
-### 🚀 Roadmap
-1. Learn design basics  
-2. Practice tools  
-3. Build portfolio  
-
-### ⭐ More Options
-- Video Editor  
-- Content Creator  
 """
 
     else:
         return """
-## 📊 Top Careers
+## 📊 Recommended Path: BUSINESS INTELLIGENCE
+
+You show leadership and strategic thinking.
+
+### 🎯 Careers:
 - Business Analyst  
-- Marketing Manager  
 - Entrepreneur  
+- Marketing Manager  
 
-### 📌 Why?
-You have leadership and communication skills.
+### 🚀 Strategy:
+Learn business basics → Case studies → Networking → Internships
 
-### 🛠 Skills Needed
-- Communication  
-- Strategy  
-- Management  
-
-### 🚀 Roadmap
-1. Learn business basics  
-2. Study case studies  
-3. Gain internships  
-
-### ⭐ More Options
-- HR Manager  
-- Sales Executive  
 """
 
-# 🚀 ANALYZE
-if st.button("🚀 Analyze My Career"):
+# ================= ANALYZE OUTPUT =================
+if analyze_btn:
+    scores = calculate_scores()
 
-    if not user_input:
-        st.warning("Please write something about yourself")
-    else:
-        scores = calculate_scores(q1, q2, q3)
+    st.markdown("## 📊 Your Intelligence Profile")
 
-        # 📊 GRAPH
-        fig, ax = plt.subplots()
-        ax.bar(scores.keys(), scores.values())
-        ax.set_title("Your Strength Analysis")
-        st.pyplot(fig)
+    fig, ax = plt.subplots()
+    ax.bar(scores.keys(), scores.values())
+    st.pyplot(fig)
 
-        result = get_career_recommendation(scores, user_input)
+    result = generate_result(scores, user_input)
+    st.markdown(result)
 
-        st.markdown(result)
-
-        # 📥 PDF
-        def create_pdf(text):
-            doc = SimpleDocTemplate("career_report.pdf")
-            styles = getSampleStyleSheet()
-            story = [Paragraph(text, styles["Normal"])]
-            doc.build(story)
-
-        create_pdf(result)
-
-        with open("career_report.pdf", "rb") as file:
-            st.download_button("📥 Download Report", file, "career_report.pdf")
-
-# 🌍 EXPLORE
+# ================= EXPLORE =================
 st.markdown("---")
-category = st.selectbox(
-    "Explore Careers",
-    ["Technology", "Creative", "Business", "Science", "Healthcare"]
-)
+st.markdown("## 🌍 Explore Career Domains")
 
-if st.button("🔎 Show Careers"):
+category = st.selectbox("Select Domain", ["Technology", "Creative", "Business"])
+
+if st.button("🔎 Explore"):
     if category == "Technology":
-        st.markdown("""
-- Data Scientist  
-- Web Developer  
-- AI Engineer  
-- Cybersecurity Analyst  
-- Cloud Engineer  
-""")
-
+        st.markdown("Data Scientist, AI Engineer, Web Developer, Cybersecurity Analyst")
     elif category == "Creative":
-        st.markdown("""
-- Graphic Designer  
-- Animator  
-- UI/UX Designer  
-- Video Editor  
-- Content Creator  
-""")
-
-    elif category == "Business":
-        st.markdown("""
-- Business Analyst  
-- Marketing Manager  
-- Entrepreneur  
-- HR Manager  
-- Sales Executive  
-""")
-
-    elif category == "Science":
-        st.markdown("""
-- Research Scientist  
-- Lab Technician  
-- Physicist  
-- Chemist  
-""")
-
+        st.markdown("UI/UX Designer, Animator, Graphic Designer, Video Editor")
     else:
-        st.markdown("""
-- Doctor  
-- Nurse  
-- Pharmacist  
-- Medical Lab Technician  
-""")
+        st.markdown("Business Analyst, Entrepreneur, Marketing Manager")
 
-# 🔍 EXPLAIN
+# ================= EXPLAIN =================
 st.markdown("---")
-career_name = st.text_input("Enter career name")
+st.markdown("## 🔍 Career Explainer")
 
-if st.button("📖 Explain Career"):
-    if career_name.lower() == "data scientist":
-        st.markdown("""
-### 📘 Data Scientist
-Analyzes data to extract insights.
+career = st.text_input("Enter career (e.g. Data Scientist)")
 
-### 🛠 Skills:
-- Python  
-- Statistics  
-- Machine Learning  
+career_data = {
+    "data scientist": "Works with data to find insights. Skills: Python, ML, Stats.",
+    "software engineer": "Builds applications. Skills: Programming, Problem solving.",
+    "ui ux designer": "Designs user experience. Skills: Figma, Creativity.",
+    "business analyst": "Analyzes business problems. Skills: Communication, Strategy."
+}
 
-### 🚀 Roadmap:
-1. Learn Python  
-2. Learn Data Analysis  
-3. Build projects  
-""")
+if st.button("📖 Explain"):
+    key = career.lower().strip()
+    if key in career_data:
+        st.markdown(career_data[key])
     else:
-        st.markdown("⚠️ Detailed info coming soon...")
+        st.markdown("⚠️ Career not found. Try common roles like Data Scientist, Designer, etc.")
 
 # FOOTER
 st.markdown("---")
-st.caption("🏆 Career Counselor (Hackathon Version )")
+st.caption("🏆 AI Career Counselor Pro | Advanced Logic Version")
