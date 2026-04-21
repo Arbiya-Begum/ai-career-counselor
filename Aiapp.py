@@ -1,26 +1,27 @@
-  # Smart Career Intelligence System (Premium Version)
+# Career Intelligence System (Clean Premium Version)
 
 import streamlit as st
 import matplotlib.pyplot as plt
 import time
-from reportlab.platypus import SimpleDocTemplate, Paragraph
-from reportlab.lib.styles import getSampleStyleSheet
 
 # 🌐 CONFIG
-st.set_page_config(page_title="Career Intelligence System", page_icon="🧠", layout="centered")
+st.set_page_config(page_title="Career Intelligence System", page_icon="🧠")
 
-# 🎨 PREMIUM UI
+# 🎨 FIXED UI (NO FADED TEXT)
 st.markdown("""
 <style>
-body {background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);}
-.stApp {background: transparent;}
-.block-container {padding: 2rem;}
-.stButton>button {
-    background: linear-gradient(90deg, #00c6ff, #0072ff);
+.stApp {
+    background-color: #0f172a;
     color: white;
-    border-radius: 12px;
+}
+h1, h2, h3, h4, h5, h6, p, label {
+    color: white !important;
+}
+.stButton>button {
+    background: linear-gradient(90deg, #2563eb, #1e40af);
+    color: white;
+    border-radius: 10px;
     height: 3em;
-    font-size: 16px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -75,114 +76,92 @@ def calculate_scores():
 
     return scores
 
-# 🧠 FAKE-AI GENERATOR
+# 🧠 SMART RESULT
 def smart_text(scores, user_input):
     dominant = max(scores, key=scores.get)
 
-    base = f"""
-Based on your responses, your dominant strength is **{dominant} Intelligence**.
+    intro = f"""
+### 🎯 Your Dominant Strength: **{dominant}**
 
-Your input suggests: "{user_input[:120]}..."
-
-This indicates a natural inclination towards structured thinking and growth-oriented mindset.
+From your inputs, especially:  
+“{user_input[:100]}...”
+you show a strong inclination towards {dominant.lower()} thinking.
 """
 
     if dominant == "Tech":
-        extra = """
-You tend to break down problems logically and seek efficient solutions.
+        body = """
+### 💻 Recommended Careers:
+- Data Scientist  
+- Software Developer  
+- AI Engineer  
+- Cybersecurity Analyst  
+- Cloud Engineer  
+- Machine Learning Engineer  
 
-### 🎯 Best Career Matches:
-- Data Scientist
-- Software Developer
-- AI Engineer
-- Cybersecurity Analyst
-- Cloud Engineer
-- Machine Learning Engineer
-
-### 🚀 Growth Path:
-Learn Python → Work on real datasets → Build ML models → Deploy projects
+### 🚀 Roadmap:
+Python → Projects → Data/ML → Real-world practice
 """
 
     elif dominant == "Creative":
-        extra = """
-You express ideas visually and think beyond conventional boundaries.
+        body = """
+### 🎨 Recommended Careers:
+- UI/UX Designer  
+- Graphic Designer  
+- Animator  
+- Video Editor  
+- Content Creator  
 
-### 🎯 Best Career Matches:
-- UI/UX Designer
-- Graphic Designer
-- Animator
-- Video Editor
-- Content Creator
-- Creative Director
-
-### 🚀 Growth Path:
-Learn tools → Build portfolio → Freelance → Personal branding
+### 🚀 Roadmap:
+Tools → Portfolio → Freelance → Personal brand
 """
 
     else:
-        extra = """
-You naturally lead, strategize, and influence outcomes.
+        body = """
+### 📊 Recommended Careers:
+- Business Analyst  
+- Entrepreneur  
+- Marketing Manager  
+- HR Manager  
+- Product Manager  
 
-### 🎯 Best Career Matches:
-- Business Analyst
-- Entrepreneur
-- Marketing Manager
-- HR Manager
-- Sales Strategist
-- Product Manager
-
-### 🚀 Growth Path:
-Learn business fundamentals → Case studies → Internships → Networking
+### 🚀 Roadmap:
+Business basics → Case studies → Internships → Networking
 """
 
-    return base + extra
+    return intro + body
 
 # ================= OUTPUT =================
 if analyze_quiz:
     scores = calculate_scores()
 
-    st.markdown("## 📊 Intelligence Breakdown")
+    st.markdown("## 📊 Your Profile")
 
-    # 🔥 Animated feel
     progress = st.progress(0)
     for i in range(100):
-        time.sleep(0.01)
+        time.sleep(0.005)
         progress.progress(i + 1)
 
     fig, ax = plt.subplots()
     ax.bar(scores.keys(), scores.values())
+    ax.set_title("Skill Distribution")
     st.pyplot(fig)
-
-    st.success("Analysis Complete ✔")
 
 if analyze_user:
     if not user_input:
-        st.warning("Please enter your details")
+        st.warning("Please enter details")
     else:
         scores = calculate_scores()
         result = smart_text(scores, user_input)
-
-        st.markdown("## 🎯 Personalized Insights")
         st.markdown(result)
-
-        # PDF
-        doc = SimpleDocTemplate("career_report.pdf")
-        styles = getSampleStyleSheet()
-        story = [Paragraph(result, styles["Normal"])]
-        doc.build(story)
-
-        with open("career_report.pdf", "rb") as f:
-            st.download_button("📥 Download Report", f, "career_report.pdf")
 
 # ================= EXPLORE =================
 st.markdown("---")
-st.markdown("## 🌍 Explore Career Paths")
+st.markdown("## 🌍 Explore Careers")
 
 category = st.selectbox("Choose domain", ["Technology", "Creative", "Business", "Science", "Healthcare"])
 
 if st.button("🔎 Show Careers"):
     st.markdown("""
-### 📌 Career Options
 - Data Scientist  
 - Software Developer  
 - AI Engineer  
@@ -214,15 +193,15 @@ career_options = [
 selected = st.selectbox("Select a career", career_options)
 
 career_info = {
-    "Data Scientist": "Analyzes data to extract insights using Python, ML, and statistics.",
-    "Software Developer": "Builds applications and systems using programming.",
-    "AI Engineer": "Designs intelligent systems and machine learning models.",
-    "UI/UX Designer": "Creates user-friendly digital experiences.",
-    "Graphic Designer": "Designs visual content and branding.",
-    "Business Analyst": "Solves business problems using data and strategy.",
-    "Entrepreneur": "Builds and manages business ventures.",
+    "Data Scientist": "Analyzes data using Python, ML, and statistics.",
+    "Software Developer": "Builds software systems and apps.",
+    "AI Engineer": "Creates intelligent systems using AI models.",
+    "UI/UX Designer": "Designs user-friendly interfaces.",
+    "Graphic Designer": "Creates visual content and branding.",
+    "Business Analyst": "Solves business problems using data.",
+    "Entrepreneur": "Builds and manages startups.",
     "Doctor": "Diagnoses and treats patients.",
-    "Research Scientist": "Conducts experiments and advances knowledge."
+    "Research Scientist": "Conducts experiments and innovations."
 }
 
 if st.button("📖 Show Details"):
@@ -231,4 +210,4 @@ if st.button("📖 Show Details"):
 
 # FOOTER
 st.markdown("---")
-st.caption("“The future depends on what you build today.”")
+st.caption("“The best way to predict your future is to build it.”")
