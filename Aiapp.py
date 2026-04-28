@@ -1,222 +1,161 @@
 import streamlit as st
-from reportlab.platypus import SimpleDocTemplate, Paragraph
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.lib import colors
 
-st.set_page_config(page_title="Career Intelligence System", layout="centered")
+# -------------------- PAGE CONFIG --------------------
+st.set_page_config(page_title="Career Intelligence System", layout="centered", page_icon="🎯")
 
 # -------------------- STYLING --------------------
 st.markdown("""
 <style>
-body {
-    background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
-    color: white;
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap');
+
+html, body, [class*="css"] {
+    font-family: 'DM Sans', sans-serif;
+    background-color: #f7f5f2;
+    color: #1a1a2e;
 }
+
 h1, h2, h3 {
-    color: #ffffff;
+    font-family: 'Playfair Display', serif;
+    color: #1a1a2e;
 }
-.stButton>button {
-    background: linear-gradient(to right, #4facfe, #00f2fe);
-    color: white;
+
+/* Header banner */
+.header-banner {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+    border-radius: 18px;
+    padding: 40px 36px 32px 36px;
+    margin-bottom: 32px;
+    box-shadow: 0 8px 32px rgba(26,26,46,0.13);
+}
+.header-banner h1 {
+    color: #f7f5f2 !important;
+    font-size: 2.2rem;
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+}
+.header-banner p {
+    color: #a8b2d8;
+    font-size: 1rem;
+    margin: 0;
+    font-style: italic;
+}
+
+/* Section cards */
+.section-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 28px 28px 20px 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 16px rgba(26,26,46,0.07);
+    border-left: 4px solid #0f3460;
+}
+
+/* Metric pill */
+.metric-pill {
+    display: inline-block;
+    background: #eef2ff;
+    color: #0f3460;
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    margin: 3px 3px;
+    border: 1px solid #c7d2fe;
+}
+
+/* Pros/cons */
+.pro-item { color: #166534; background: #f0fdf4; border-radius: 8px; padding: 6px 12px; margin: 4px 0; font-size: 0.92rem; }
+.con-item { color: #991b1b; background: #fff1f2; border-radius: 8px; padding: 6px 12px; margin: 4px 0; font-size: 0.92rem; }
+
+/* Roadmap steps */
+.roadmap-step {
+    background: #f7f5f2;
     border-radius: 10px;
+    padding: 10px 16px;
+    margin: 6px 0;
+    border-left: 3px solid #0f3460;
+    font-size: 0.93rem;
+    color: #1a1a2e;
 }
+
+/* Result box */
+.result-box {
+    background: linear-gradient(135deg, #eef2ff, #f0fdf4);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-top: 16px;
+    border: 1px solid #c7d2fe;
+}
+
+/* Match score bar */
+.match-bar-bg {
+    background: #e5e7eb;
+    border-radius: 20px;
+    height: 10px;
+    margin: 6px 0 14px 0;
+    overflow: hidden;
+}
+.match-bar-fill {
+    height: 10px;
+    border-radius: 20px;
+    background: linear-gradient(to right, #0f3460, #4facfe);
+}
+
+/* Salary badge */
+.salary-badge {
+    background: #0f3460;
+    color: #fff;
+    border-radius: 8px;
+    padding: 6px 16px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    display: inline-block;
+    margin: 8px 0;
+}
+
+/* Divider */
+.styled-divider {
+    border: none;
+    border-top: 2px solid #e5e7eb;
+    margin: 28px 0;
+}
+
+/* Streamlit button override */
+.stButton > button {
+    background: linear-gradient(135deg, #1a1a2e, #0f3460) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-weight: 500 !important;
+    padding: 10px 24px !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 2px 8px rgba(15,52,96,0.18) !important;
+}
+.stButton > button:hover {
+    opacity: 0.88 !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Radio / selectbox labels */
+.stRadio label, .stSelectbox label { font-weight: 500; color: #1a1a2e; }
+
+/* Success / warning overrides */
+.stSuccess { border-radius: 10px; }
+.stWarning { border-radius: 10px; }
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🧠 Career Intelligence System")
-st.caption("“Clarity comes from action, not overthinking.”")
+# -------------------- HEADER --------------------
+st.markdown("""
+<div class="header-banner">
+    <h1>🎯 Career Intelligence System</h1>
+    <p>"Clarity comes from action, not overthinking."</p>
+</div>
+""", unsafe_allow_html=True)
 
-# -------------------- CAREER DATA --------------------
-career_domains = {
-    "Technology": [
-        "Data Scientist", "Software Developer", "AI Engineer",
-        "Cybersecurity Analyst", "Cloud Engineer"
-    ],
-    "Design": [
-        "UI/UX Designer", "Animator", "Graphic Designer"
-    ],
-    "Business": [
-        "Business Analyst", "Entrepreneur", "Marketing Manager", "HR Manager"
-    ],
-    "Healthcare": [
-        "Doctor", "Nurse", "Research Scientist"
-    ]
-}
-
-career_explanations = {
-    "Data Scientist": """A Data Scientist works with data to uncover patterns and insights.
-
-They collect, clean, and analyze structured and unstructured data.
-
-This role involves machine learning, statistics, and programming.
-
-They build predictive models to forecast future trends.
-
-Tools like Python, SQL, and visualization libraries are essential.
-
-They work across industries like finance, healthcare, and tech.
-
-Strong analytical thinking is required.
-
-Communication skills help explain findings to stakeholders.
-
-It is one of the fastest-growing careers globally.
-
-Continuous learning is necessary due to evolving technologies.
-
-Ideal for those who enjoy problem-solving and logic.
-""",
-
-    "Doctor": """A Doctor diagnoses and treats illnesses to improve health.
-
-They work in hospitals, clinics, and healthcare institutions.
-
-This profession requires years of education and training.
-
-Doctors must make critical decisions under pressure.
-
-They specialize in various medical fields.
-
-Compassion and communication are essential.
-
-They play a key role in saving lives.
-
-Medical knowledge constantly evolves.
-
-Highly respected but demanding profession.
-
-Long working hours are common.
-
-Ideal for those passionate about helping others.
-"""
-}
-
-# -------------------- PDF FUNCTION --------------------
-def generate_pdf(text):
-    file_path = "career_report.pdf"
-    doc = SimpleDocTemplate(file_path)
-    styles = getSampleStyleSheet()
-
-    content = []
-    for line in text.split("\n"):
-        content.append(Paragraph(line, styles["Normal"]))
-
-    doc.build(content)
-    return file_path
-
-# -------------------- SECTION 1: PERSONAL QUIZ --------------------
-st.header("🧩 Personal Intelligence Quiz")
-
-interest = st.radio("What excites you?", ["Solving problems", "Designing", "Leading"])
-strength = st.radio("Your strength?", ["Logic", "Creativity", "Communication"])
-work_style = st.radio("Work style?", ["Independent", "Teamwork", "Leadership"])
-
-if st.button("🔘 Analyze"):
-    st.success("Analysis Complete!")
-
-    if interest == "Solving problems":
-        st.write("👉 You are inclined towards Technology roles.")
-    elif interest == "Designing":
-        st.write("👉 You are inclined towards Creative/Design roles.")
-    else:
-        st.write("👉 You are inclined towards Business/Leadership roles.")
-
-# -------------------- SECTION 2: ABOUT YOURSELF --------------------
-st.header("📝 Tell Us About Yourself")
-
-about = st.text_area("Write about your interests, goals, or personality...")
-
-if st.button("🧠 Analyze Yourself"):
-    if about:
-        st.success("Insight Generated!")
-        st.write(f"""
-Based on your input:
-
-👉 You show strong self-awareness and clarity of thought.  
-👉 Your personality indicates potential for growth in dynamic careers.  
-👉 You seem adaptable and capable of learning new skills.  
-👉 Focus on consistency and practical execution to reach goals.  
-
-“Success is built on small consistent actions.”
-""")
-    else:
-        st.warning("Please write something first.")
-
-# -------------------- SECTION 3: EXPLORE CAREERS --------------------
-st.header("🌍 Explore Careers")
-
-selected_domain = st.selectbox("Choose domain", list(career_domains.keys()))
-
-if st.button("🔍 Show Careers"):
-    careers = career_domains[selected_domain]
-
-    st.subheader(f"Careers in {selected_domain}")
-    for career in careers:
-        st.write(f"• {career}")
-
-# -------------------- SECTION 4: EXPLAIN CAREER --------------------
-st.header("📘 Explain Career")
-
-selected_career = st.selectbox(
-    "Choose a career",
-    [c for careers in career_domains.values() for c in careers]
-)
-
-if st.button("📖 Explain"):
-    if selected_career in career_explanations:
-        st.write(career_explanations[selected_career])
-    else:
-        st.write(f"""
-{selected_career} is a professional career path with strong growth potential.
-
-It requires dedication, skill development, and practical experience.
-
-You will need to build core knowledge in this domain.
-
-Hands-on projects will improve your understanding.
-
-Consistency and learning attitude are key.
-
-This career offers opportunities across industries.
-
-You should focus on building relevant skills.
-
-Networking and internships can boost your growth.
-
-Staying updated with trends is important.
-
-With effort, you can build a successful future in this field.
-""")
-
-# -------------------- SECTION 5: ROADMAP + PDF --------------------
-st.header("🗺️ Career Roadmap")
-
-if st.button("📥 Generate Report"):
-    report_text = f"""
-Career: {selected_career}
-
-Skills Required:
-- Core domain knowledge
-- Problem-solving
-- Communication
-- Practical experience
-
-Roadmap:
-1. Learn fundamentals
-2. Build small projects
-3. Practice real-world problems
-4. Gain internship experience
-5. Build portfolio
-6. Apply for jobs
-
-“Discipline beats motivation.”
-"""
-
-    pdf_file = generate_pdf(report_text)
-
-    with open(pdf_file, "rb") as f:
-        st.download_button(
-            label="Download PDF",
-            data=f,
-            file_name="career_report.pdf",
-            mime="application/pdf"
-        )
+# --------------------
